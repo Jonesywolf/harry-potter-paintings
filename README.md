@@ -26,7 +26,7 @@ If the characters could randomly
 
 ## To Do
 ### Camera Stuff
-- [ ] Facial Detection with webcam
+- [x] Facial Detection with webcam
 - [ ] Facial Recognition with webcam
 - [ ] Combine the above
 - [ ] Run it on a Raspberry Pi
@@ -37,7 +37,11 @@ If the characters could randomly
 ### Server stuff
 - [ ] Test local connections using an Ethernet Switch
 - [ ] Investigate how to send images, do we need a database?
-- [ ] See if you can run it on a Raspberry Pi 
+- [ ] See if you can run it on a Raspberry Pi
+### Game stuff
+- [ ] Create a test pygame
+### Performace stuff
+- [ ] Run everything in separate processes or take advantage of multiple cores for performance
 
 
 

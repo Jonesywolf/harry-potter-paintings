@@ -1,0 +1,7 @@
+cmake==3.28.3
+debugpy==1.8.1
+importlib-metadata==7.0.1
+numpy==1.26.4
+opencv-python==4.9.0.80
+pygame==2.5.2
+zipp==3.17.0
