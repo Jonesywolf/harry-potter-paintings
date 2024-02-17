@@ -26,18 +26,18 @@ If the characters could randomly
 
 ## To Do
 ### Camera Stuff
-[ ] Facial Detection with webcam
-[ ] Facial Recognition with webcam
-[ ] Combine the above
-[ ] Run it on a Raspberry Pi
+- [ ] Facial Detection with webcam
+- [ ] Facial Recognition with webcam
+- [ ] Combine the above
+- [ ] Run it on a Raspberry Pi
 ### Raspberry Pi Setup
-[ ] Use a camera on Raspberry Pis
-[ ] Get touchscreens working on Raspberry Pis
-[ ] Get Pis connected to Wifi
+- [ ] Use a camera on Raspberry Pis
+- [ ] Get touchscreens working on Raspberry Pis
+- [ ] Get Pis connected to Wifi
 ### Server stuff
-[ ] Test local connections using an Ethernet Switch
-[ ] Investigate how to send images, do we need a database?
-[ ] See if you can run it on a Raspberry Pi 
+- [ ] Test local connections using an Ethernet Switch
+- [ ] Investigate how to send images, do we need a database?
+- [ ] See if you can run it on a Raspberry Pi 
 
 
 
