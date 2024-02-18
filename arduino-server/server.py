@@ -23,7 +23,23 @@ def send_arduino_command(command):
     global arduino_serial
     arduino_serial.write(command.encode())
 
-arduino_serial = serial.Serial('COM3', 9600)  # replace 'COM3' with your port
+import serial.tools.list_ports
+
+def find_serial_device():
+    ports = list(serial.tools.list_ports.comports())
+    for p in ports:
+        try:
+            ser = serial.Serial(p.device, 9600)  # Adjust the baud rate as needed
+            print(f"Successfully connected to {p.device}")
+            return ser
+        except:
+            print(f"Failed to connect to {p.device}")
+    return None
+
+arduino_serial = find_serial_device()
+if arduino_serial is None:
+    print("No available serial devices")
+    exit(1)
 send_arduino_command(state['light'])
 
 @app.route('/control/light', methods=['POST'])
