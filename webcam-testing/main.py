@@ -1,4 +1,10 @@
 import cv2
+import zmq
+from time import sleep
+
+context = zmq.Context()
+socket = context.socket(zmq.REP)
+socket.bind("tcp://*:50165")
 
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
@@ -9,7 +15,8 @@ video_capture = cv2.VideoCapture(0)
 while True:
     # Capture frame-by-frame
     ret, frame = video_capture.read()
-
+    print(frame.shape)
+    print(ret)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     faces = face_cascade.detectMultiScale(
@@ -21,9 +28,21 @@ while True:
     )
 
     # Draw a rectangle around the faces
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+    if len(faces) == 0:
+        message = socket.recv()
+        i=-1
+        pos_out = f"FACE{i}:{-1};".encode()
 
+        socket.send(pos_out)
+
+    for i, (x, y, w, h) in enumerate(faces):
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        #  Send reply back to client
+        message = socket.recv()
+        pos_out = f"FACE{i}:{x};".encode()
+
+        socket.send(pos_out)
+    
     # Display the resulting frame
     cv2.imshow('Video', frame)
 

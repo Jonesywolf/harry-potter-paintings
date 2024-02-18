@@ -1,0 +1,94 @@
+import pygame, sys, random, os
+from threading import Timer
+pygame.init()
+
+size = width, height = 900,500
+screen = pygame.display.set_mode(size) 
+
+while True:
+    if pygame.event.peek(pygame.QUIT):
+        pygame.quit()
+        sys.exit()
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key==pygame.K_RIGHT:
+                # legs = []
+                legs = legsWc
+                if player == shotgunSR or player == shotgunS:
+                    player = shotgunS
+                elif player == shotgunNR or player == shotgunN:
+                    player = shotgunN
+          #      if event.key!=pygame.K_SPACE:
+           #         player = shotgunN
+            if event.key==pygame.K_LEFT:
+                legs = []
+                legs = legsWcR
+                if player == shotgunSR or player == shotgunS:
+                    player = shotgunSR
+                elif player == shotgunNR or player == shotgunN:
+                    player = shotgunNR
+               # if event.key!=pygame.K_SPACE:
+                #    player = shotgunNR
+
+            if event.key==pygame.K_SPACE:
+                if legs == legsWc or legs == legsN:
+                    player = shotgunS
+                    v = 1
+                if legs == legsWcR or legs == legsNR:
+                    player = shotgunSR
+                    v = 1
+                    
+        if event.type == pygame.KEYUP:
+            if event.key==pygame.K_RIGHT:
+                legs = legsN
+                if player == shotgunSR or player == shotgunS:
+                    player = shotgunS
+                elif player == shotgunNR or player == shotgunN:
+                    player = shotgunN
+            if event.key==pygame.K_LEFT:
+                legs = legsNR
+                if player == shotgunSR or player == shotgunS:
+                    player = shotgunSR
+                elif player == shotgunNR or player == shotgunN:
+                    player = shotgunNR
+            if event.key==pygame.K_SPACE:
+                v = 2
+                
+    '''
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_SPACE] and reload == False:
+        reload = True
+        timer = Timer(1,reloading)
+        timer.start()
+
+    if pygame.key.get_focused() == False:
+        v = 0
+        player = []
+        player = shotgunN
+   '''     
+        
+    
+            
+    screen.fill(black)
+    #draw your game elements here:
+    if v == 0:
+        numchange = 100 
+        numphoto = 200
+    if v > 0:
+        numchange = 10 
+        numphoto = len(player)*10
+    playerSeq = (playerSeq+1) % numphoto
+    if v==2 and playerSeq==0:
+        v = 0
+        if legs == legsWc:
+            player = shotgunN
+        if legs == legsWcR:
+            player = shotgunNR
+    screen.blit(player[playerSeq//numchange], playerrect)
+    legSeq = (legSeq+1) % 35
+    if len(legs) <= 1:
+        screen.blit(legs[0],playerrect)
+    if len(legs) > 1:
+        screen.blit(legs[legSeq//7], playerrect)
+    pygame.display.flip()
+    pygame.time.wait(10)
