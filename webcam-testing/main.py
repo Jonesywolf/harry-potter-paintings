@@ -2,9 +2,16 @@ import cv2
 import zmq
 from time import sleep
 
+port = 5556
 context = zmq.Context()
-socket = context.socket(zmq.REP)
-socket.bind("tcp://*:50165")
+socket = context.socket(zmq.PUSH)
+socket.connect(f"tcp://localhost:{port}")
+def send_data(port, data):
+
+    
+    print(f"Sending data: {data}")
+    socket.send_string(data)
+
 
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
@@ -29,19 +36,20 @@ while True:
 
     # Draw a rectangle around the faces
     if len(faces) == 0:
-        message = socket.recv()
+        # message = socket.recv()
         i=-1
-        pos_out = f"FACE{i}:{-1};".encode()
+        pos_out = f"FACE{i}:{-1};"
 
-        socket.send(pos_out)
+        send_data(port=5556, data=pos_out)
 
     for i, (x, y, w, h) in enumerate(faces):
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
         #  Send reply back to client
-        message = socket.recv()
-        pos_out = f"FACE{i}:{x};".encode()
+        # message = socket.recv()
+        pos_out = f"FACE{i}:{x};"
+        send_data(port=5556, data=pos_out)
 
-        socket.send(pos_out)
+        # socket.send(pos_out)
     
     # Display the resulting frame
     cv2.imshow('Video', frame)

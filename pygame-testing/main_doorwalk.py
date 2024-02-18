@@ -1,18 +1,9 @@
 import zmq
 import numpy as np
+
 from time import sleep
 import os
 import sys
-
-sys.path.append('arduino-server')
-import client
-
-context = zmq.Context()
-
-# Socket to talk to server
-print("Connecting to hello world server…")
-socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:50165")
 
 # Simple pygame program
 import player, utils
@@ -31,6 +22,18 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
+
+sys.path.append('arduino-server')
+import client
+
+# Socket to talk to server
+# def receive_data(port):
+context = zmq.Context()
+socket = context.socket(zmq.PULL)
+socket.bind(f"tcp://*:{5556}")
+
+# receive_data(5556)
+
 
 pygame.init()
 utils.set_screen_dimensions()
@@ -93,11 +96,13 @@ while running:
             
     # Get the set of keys pressed and check for user input
     pressed_keys = pygame.key.get_pressed()
-    socket.send(b"1Hello")
+    # socket.send(b"1Hello")
     sleep(0.01)
     #  Get the reply.
-    message = socket.recv()
-    outputs = message.decode().split(";")
+    message = socket.recv_string()
+    print(message)
+    if message is None: continue
+    outputs = message.split(";")
 
     for i, face in enumerate(outputs):
         if face == "": continue
