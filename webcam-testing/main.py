@@ -11,6 +11,21 @@ def send_data(port, data):
     print(f"Sending data: {data}")
     socket.send(data.encode())
 
+def returnCameraIndexes():
+    # checks the first 10 indexes.
+    index = 0
+    arr = []
+    i = 10
+    while i > 0:
+        cap = cv2.VideoCapture(index)
+        if cap.read()[0]:
+            arr.append(index)
+            cap.release()
+        index += 1
+        i -= 1
+    return arr
+
+print(returnCameraIndexes())
 
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
