@@ -4,13 +4,12 @@ from time import sleep
 
 port = 5556
 context = zmq.Context()
-socket = context.socket(zmq.PUSH)
-socket.connect(f"tcp://localhost:{port}")
+socket = context.socket(zmq.REP)
+socket.connect(f"tcp://127.0.0.1:{port}")
 def send_data(port, data):
-
-    
+    socket.recv()
     print(f"Sending data: {data}")
-    socket.send_string(data)
+    socket.send(data.encode())
 
 
 face_cascade = cv2.CascadeClassifier(

@@ -29,8 +29,8 @@ import client
 # Socket to talk to server
 # def receive_data(port):
 context = zmq.Context()
-socket = context.socket(zmq.PULL)
-socket.bind(f"tcp://*:{5556}")
+socket = context.socket(zmq.REQ)
+socket.bind("tcp://127.0.0.1:5556")
 
 # receive_data(5556)
 
@@ -96,13 +96,13 @@ while running:
             
     # Get the set of keys pressed and check for user input
     pressed_keys = pygame.key.get_pressed()
-    # socket.send(b"1Hello")
+    socket.send(b"1Hello")
     sleep(0.01)
     #  Get the reply.
-    message = socket.recv_string()
+    message = socket.recv()
     print(message)
     if message is None: continue
-    outputs = message.split(";")
+    outputs = message.decode().split(";")
 
     for i, face in enumerate(outputs):
         if face == "": continue

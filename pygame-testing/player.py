@@ -125,7 +125,7 @@ class WatchingPlayer(pygame.sprite.Sprite):
 
         # Use the first image to set the sprite's surface
         
-        self.surf = self.eyes[0]
+        self.surf = self.eyes[-1]
         self.bg = self.coffee[0]
         self.text_bubble = self.text_bubbles[0]
 
