@@ -129,12 +129,12 @@ while running:
     fsm.reset(p1.rect.x)
     
     if fsm.get_state() == "open" and not opened:
-        # client.control_door(client.DOOR_OPEN)
-        client.control_light(client.LIGHT_ON)
+        client.control_door(client.DOOR_OPEN)
+        # client.control_light(client.LIGHT_ON)
         opened = 1
     elif fsm.get_state() == "closed" and opened:
-        # client.control_door(client.DOOR_CLOSED)
-        client.control_light(client.LIGHT_OFF)
+        client.control_door(client.DOOR_CLOSED)
+        # client.control_light(client.LIGHT_OFF)
         opened = 0
     # Fill the screen with black
     # screen.fill((200, 200, 200))
