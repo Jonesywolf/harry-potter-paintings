@@ -4,20 +4,36 @@ from time import sleep
 
 port = 5556
 context = zmq.Context()
-socket = context.socket(zmq.PUSH)
-socket.connect(f"tcp://localhost:{port}")
+socket = context.socket(zmq.REP)
+socket.connect(f"tcp://127.0.0.1:{port}")
 def send_data(port, data):
-
-    
+    socket.recv()
     print(f"Sending data: {data}")
-    socket.send_string(data)
+    socket.send(data.encode())
 
+def returnCameraIndexes():
+    # checks the first 10 indexes.
+    index = 0
+    arr = []
+    i = 10
+    while i > 0:
+        cap = cv2.VideoCapture(index)
+        if cap.read()[0]:
+            arr.append(index)
+            cap.release()
+        index += 1
+        i -= 1
+    return arr
+
+cameras = returnCameraIndexes()
+print(cameras)
+assert len(cameras) > 0, "no cameras detected"
 
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 )
 
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(cameras[0])
 
 while True:
     # Capture frame-by-frame

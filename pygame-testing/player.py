@@ -21,13 +21,13 @@ class WalkingPlayer(pygame.sprite.Sprite):
 
         self.legs_wc = []
         self.legs_idle = []
-        leg_wc_folder = ".\\legs-walk\\"
+        leg_wc_folder = "./legs-walk/"
         for file in os.listdir(leg_wc_folder):
             # print(file)
             if file!="Thumbs.db":
                 self.legs_wc.append(pygame.image.load(leg_wc_folder+file))
         
-        leg_idle_folder = ".\\legs-idle\\"
+        leg_idle_folder = "./legs-idle/"
         for file in os.listdir(leg_idle_folder):
             # print(file)
             if file!="Thumbs.db":
@@ -97,9 +97,9 @@ class WatchingPlayer(pygame.sprite.Sprite):
         self.eyes = []
         self.coffee = []
         self.text_bubbles = []
-        eyes_folder = ".\\following-eyes\\"
-        coffee_folder = ".\\coffee-imgs\\"
-        text_bubble_folder = ".\\text-bubble\\"
+        eyes_folder = "./following-eyes/"
+        coffee_folder = "./coffee-imgs/"
+        text_bubble_folder = "./text-bubble/"
 
         for file in os.listdir(coffee_folder):
             # print(file)
@@ -125,7 +125,7 @@ class WatchingPlayer(pygame.sprite.Sprite):
 
         # Use the first image to set the sprite's surface
         
-        self.surf = self.eyes[0]
+        self.surf = self.eyes[-1]
         self.bg = self.coffee[0]
         self.text_bubble = self.text_bubbles[0]
 

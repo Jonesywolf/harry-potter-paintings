@@ -29,8 +29,8 @@ import client
 # Socket to talk to server
 # def receive_data(port):
 context = zmq.Context()
-socket = context.socket(zmq.PULL)
-socket.bind(f"tcp://*:{5556}")
+socket = context.socket(zmq.REQ)
+socket.bind("tcp://127.0.0.1:5556")
 
 # receive_data(5556)
 
@@ -43,7 +43,7 @@ screen = pygame.display.set_mode([utils.screen_width, utils.screen_height])
 p1 = player.WalkingPlayer()
 fsm = player.DoorStateMachine() 
 
-mansion_folder = ".\\mansion\\"
+mansion_folder = "./mansion/"
 mansion = []
 for file in os.listdir(mansion_folder):
     # print(file)
@@ -96,13 +96,13 @@ while running:
             
     # Get the set of keys pressed and check for user input
     pressed_keys = pygame.key.get_pressed()
-    # socket.send(b"1Hello")
+    socket.send(b"1Hello")
     sleep(0.01)
     #  Get the reply.
-    message = socket.recv_string()
+    message = socket.recv()
     print(message)
     if message is None: continue
-    outputs = message.split(";")
+    outputs = message.decode().split(";")
 
     for i, face in enumerate(outputs):
         if face == "": continue
@@ -129,12 +129,12 @@ while running:
     fsm.reset(p1.rect.x)
     
     if fsm.get_state() == "open" and not opened:
-        # client.control_door(client.DOOR_OPEN)
-        client.control_light(client.LIGHT_ON)
+        client.control_door(client.DOOR_OPEN)
+        # client.control_light(client.LIGHT_ON)
         opened = 1
     elif fsm.get_state() == "closed" and opened:
-        # client.control_door(client.DOOR_CLOSED)
-        client.control_light(client.LIGHT_OFF)
+        client.control_door(client.DOOR_CLOSED)
+        # client.control_light(client.LIGHT_OFF)
         opened = 0
     # Fill the screen with black
     # screen.fill((200, 200, 200))

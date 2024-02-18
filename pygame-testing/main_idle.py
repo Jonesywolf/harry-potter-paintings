@@ -1,12 +1,13 @@
 import zmq
 import numpy as np
 from time import sleep
-context = zmq.Context()
+# context = zmq.Context()
 
 # Socket to talk to server
-print("Connecting to hello world server…")
+context = zmq.Context()
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:50165")
+socket.bind(f"tcp://127.0.0.1:{5556}")
+
 
 # Simple pygame program
 import player, utils
@@ -32,10 +33,10 @@ utils.set_screen_dimensions()
 screen = pygame.display.set_mode([utils.screen_width, utils.screen_height])
 GRAY = (100, 100, 100)
 
-font = pygame.font.Font("Fipps-Regular.otf",15)
-fontBig = pygame.font.Font("Fipps-Regular.otf",19)
-fontBigger = pygame.font.Font("Fipps-Regular.otf",23)
-fontBiggest = pygame.font.Font("Fipps-Regular.otf",40)
+# font = pygame.font.Font("Fipps-Regular.otf",15)
+# fontBig = pygame.font.Font("Fipps-Regular.otf",19)
+# fontBigger = pygame.font.Font("Fipps-Regular.otf",23)
+fontBiggest = pygame.font.SysFont("Comic Sans MS",50)
 
 p1 = player.WatchingPlayer()
 fsm = player.ChatStateMachine() 
@@ -78,8 +79,8 @@ while running:
     socket.send(b"1Hello")
     sleep(0.01)
     #  Get the reply.
-    message = socket.recv()
-    outputs = message.decode().split(";")
+    message = socket.recv_string()
+    outputs = message.split(";")
     # print(f"outputs:{outputs}")
     for i, face in enumerate(outputs):
         if face == "": continue
@@ -92,7 +93,7 @@ while running:
         x_loc = int(x_loc)
         # print(f"x_loc: {x_loc}")
 
-        print("XLOC =", x_loc)
+        # print("XLOC =", x_loc)
         if not np.any(x_locs - np.ones(MOV_AVG_SIZE)) and x_loc != -1:
             x_locs *= x_loc
         elif x_loc != -1:
@@ -104,12 +105,12 @@ while running:
     # Update the player sprite based on user keypresses
     p1.update_eyes(x_pixel)
     p1.update_background()
-    textbox_visible, text = p1.update_textbox(fsm=fsm, name="Jough")
+    textbox_visible, text = p1.update_textbox(fsm=fsm, name="buddy")
     nf = int(x_loc != -1)
-    print(f"nf:{nf}")
+    # print(f"nf:{nf}")
 
     fsm.update(nf=nf)
-    print(fsm.get_state())
+    # print(fsm.get_state())
     # Fill the screen with black
     # screen.fill((200, 200, 200))
     screen.blit(p1.bg, p1.bg_rect)
