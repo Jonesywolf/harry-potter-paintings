@@ -2,6 +2,11 @@ import zmq
 import numpy as np
 from time import sleep
 import os
+import sys
+
+sys.path.append('arduino-server')
+import client
+
 context = zmq.Context()
 
 # Socket to talk to server
@@ -33,6 +38,8 @@ utils.set_screen_dimensions()
 screen = pygame.display.set_mode([utils.screen_width, utils.screen_height])
 
 p1 = player.WalkingPlayer()
+fsm = player.DoorStateMachine() 
+
 mansion_folder = ".\\mansion\\"
 mansion = []
 for file in os.listdir(mansion_folder):
@@ -68,6 +75,8 @@ running = True
 MOV_AVG_SIZE = 100
 x_locs = np.ones(MOV_AVG_SIZE)
 j = -1
+avg_loc = p1.rect.x
+opened = 0
 while running:
     j += 1
     # Look at every event in the queue
@@ -109,7 +118,19 @@ while running:
 
     # Update the player sprite based on user keypresses
     p1.update(x_pixel)
+    print(p1.rect.x)
+
+    fsm.update(p1.rect.x)
+    fsm.reset(p1.rect.x)
     
+    if fsm.get_state() == "open" and not opened:
+        # client.control_door(client.DOOR_OPEN)
+        client.control_light(client.LIGHT_ON)
+        opened = 1
+    elif fsm.get_state() == "closed" and opened:
+        # client.control_door(client.DOOR_CLOSED)
+        client.control_light(client.LIGHT_OFF)
+        opened = 0
     # Fill the screen with black
     # screen.fill((200, 200, 200))
     

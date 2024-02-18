@@ -1,6 +1,8 @@
 import face_recognition
 import cv2
 import numpy as np
+import zqm
+
 
 # This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
 # other example, but it includes some basic performance tweaks to make things run a lot faster:
@@ -15,11 +17,11 @@ import numpy as np
 video_capture = cv2.VideoCapture(0)
 
 # Load a sample picture and learn how to recognize it.
-john_image = face_recognition.load_image_file(r"facial-recognition-testing\john.jpg")
+john_image = face_recognition.load_image_file(r"facial-recognition-testing\\john.jpg")
 john_face_encoding = face_recognition.face_encodings(john_image)[0]
 
 # Load a second sample picture and learn how to recognize it.
-halil_image = face_recognition.load_image_file("facial-recognition-testing\halil.jpg")
+halil_image = face_recognition.load_image_file(r"facial-recognition-testing\\halil.jpg")
 halil_face_encoding = face_recognition.face_encodings(halil_image)[0]
 
 # Create arrays of known face encodings and their names

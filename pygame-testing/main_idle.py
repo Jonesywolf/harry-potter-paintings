@@ -38,7 +38,7 @@ fontBigger = pygame.font.Font("Fipps-Regular.otf",23)
 fontBiggest = pygame.font.Font("Fipps-Regular.otf",40)
 
 p1 = player.WatchingPlayer()
-fsm = player.StateMachine() 
+fsm = player.ChatStateMachine() 
 
 def get_center(surf):
     # Put the center of surf at the center of the display

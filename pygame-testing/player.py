@@ -1,5 +1,6 @@
 import pygame, utils, os, time, random
 
+
 # Import pygame.locals for easier access to key coordinates
 # Updated to conform to flake8 and black standards
 from pygame.locals import (
@@ -66,7 +67,7 @@ class WalkingPlayer(pygame.sprite.Sprite):
                 self.flipped = True
                 self.surf = pygame.transform.flip(self.surf, flip_x=1, flip_y=0)
             else: self.flipped = False
-        elif abs(x_loc - prev_x) < 0.05:
+        elif abs(x_loc - prev_x) < 0.2:
             self.surf = self.legs_idle[0]
             if self.flipped:
                 self.surf = pygame.transform.flip(self.surf, flip_x=1, flip_y=0)
@@ -74,14 +75,18 @@ class WalkingPlayer(pygame.sprite.Sprite):
         print(self.rect.left, self.rect.right, self.rect.top, self.rect.bottom)
    
         # Keep player on the screen
-        if self.rect.left < -80:
-            self.rect.left = -80
+        if self.rect.left < -100:
+            self.rect.left = -100
         if self.rect.right > utils.screen_width:
             self.rect.right = utils.screen_width
         if self.rect.top <= 0:
             self.rect.top = 0
         if self.rect.bottom >= utils.screen_height:
             self.rect.bottom = utils.screen_height
+
+    def update_door(self):
+        if self.rect.x  < -70:
+            client.control_door()
 
 
 
@@ -171,7 +176,7 @@ class WatchingPlayer(pygame.sprite.Sprite):
         pass
 
 
-class StateMachine:
+class ChatStateMachine:
     def __init__(self):
         # Initial state
         self.state = 'ready'
@@ -197,6 +202,37 @@ class StateMachine:
                 self.tt = 0
                 self.prev_time = time.time()
                 self.state = 'ready'
+            print(self.tt)
+
+    def get_state(self):
+        return self.state
+
+class DoorStateMachine:
+    def __init__(self):
+        # Initial state
+        self.state = 'closed'
+        # Time since last transition
+        self.prev_time = time.time()
+        self.tt = 0
+        self.set = 0
+    def reset(self, x):
+        if x >= 0:
+            self.set = 0
+    def update(self, x):   
+        # Handle transitions from current state
+        if self.state == 'closed':
+            self.prev_time = time.time()
+            self.tt = 0
+            if x < -70 and self.set == 0:
+                self.state = 'open'
+                self.prev_time = time.time()
+                self.tt = 0
+                self.set = 1
+
+        elif self.state == 'open':
+            self.tt = time.time() - self.prev_time
+            if self.tt > 5:
+                self.state = 'closed'
             print(self.tt)
 
     def get_state(self):
