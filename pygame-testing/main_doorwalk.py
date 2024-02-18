@@ -43,7 +43,7 @@ screen = pygame.display.set_mode([utils.screen_width, utils.screen_height])
 p1 = player.WalkingPlayer()
 fsm = player.DoorStateMachine() 
 
-mansion_folder = ".\\mansion\\"
+mansion_folder = "./mansion/"
 mansion = []
 for file in os.listdir(mansion_folder):
     # print(file)
