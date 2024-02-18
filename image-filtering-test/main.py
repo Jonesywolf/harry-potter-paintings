@@ -1,129 +1,168 @@
-import cv2
-import numpy as np
-import face_recognition
+# Simple pygame program
+import threading
+import utils, capture_image
+import math
 
-# Load the overlay images
-left_eye_image = cv2.imread(r"image-filtering-test\left_eye.png", -1)  # -1 means load with alpha channel
-right_eye_image = cv2.imread(r"image-filtering-test\right_eye.png", -1)
-mouth_image = cv2.imread(r"image-filtering-test\mouth.png", -1)
-# cheek_image = cv2.imread(r"image-filtering-test\cheek_image.png", -1)
+# Import and initialize the pygame library
+import pygame
 
-# Open the webcam
-cap = cv2.VideoCapture(0)
+# Import pygame.locals for easier access to key coordinates
+# Updated to conform to flake8 and black standards
+from pygame.locals import (
+    K_ESCAPE,
+    KEYDOWN,
+    QUIT,
+)
+capture_image.load_images()
+pygame.init()
+utils.set_screen_dimensions()
+# Set up the drawing window
+screen = pygame.display.set_mode([utils.screen_width, utils.screen_height])
 
-# Check if the webcam is opened correctly
-if not cap.isOpened():
-    raise IOError("Cannot open webcam")
+# Load the background image
+background_image = pygame.image.load(r'image-filtering-test\background.jpg')
 
-# Capture the first frame
-ret, frame = cap.read()
+# Resize the background image
+background_image = pygame.transform.scale(background_image, (utils.screen_width, utils.screen_height))
 
-# Release the webcam after capturing the frame
-cap.release()
+# Load another image
+photographer_with_legs = pygame.image.load('image-filtering-test\photographer_legs.png')
 
-if ret:
-    # Convert the image to HSV color space
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+photographer_position = (1000, 769)  # Change this to the position you want
 
-    # Increase the saturation to get bright, pastel colors
-    hsv[:,:,1] = hsv[:,:,1]*1.5
+# Load the animation images
+animation_images = [pygame.image.load(fr'image-filtering-test\anim\photographer-{i}.png') for i in range(12)]
 
-    # Convert the image back to BGR color space
-    frame = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+# Position for the animation
+animation_position = (910, 400)  # Change this to the position you want
 
-    grayScaleImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    #applying median blur to smoothen an image
-    smoothGrayScale = cv2.medianBlur(grayScaleImage, 5)
-    #retrieving the edges for cartoon effect
-    getEdge = cv2.adaptiveThreshold(smoothGrayScale, 255, 
-      cv2.ADAPTIVE_THRESH_MEAN_C, 
-      cv2.THRESH_BINARY, 15, 15)
+# Frame rate for the animation
+frame_rate = 6
+
+# Time to wait between animations (in milliseconds)
+capture_interval = 10 * 1000  # Change this to the interval you want
+
+# Time when the last animation was played
+last_capture_time = 0
+
+# Create a clock object to control the frame rate
+clock = pygame.time.Clock()
+
+# * Bobbing animation *
+bob_animation_position = list(animation_position)
+# Frequency of updates (in frames)
+bob_update_frequency = 35  # Change this to the frequency you want
+
+# Counter for the number of frames
+bob_frame_counter = 0
+
+# Create a thread that will run the capture_image function and store the result in result_list
+capture_thread = threading.Thread(target=capture_image.capture_kawaii_image)
+
+capturing = False
+
+painting = None
+
+painting_position = (610, 118)  # Change this to the position you want
+painting_size = (275, 190)  # Change this to the size you want
+
+def get_center(surf):
+    # Put the center of surf at the center of the display
+    surf_center = (
+        (utils.screen_width-surf.get_width())/2,
+        (utils.screen_height-surf.get_height())/2
+    )
+    return surf_center
+
+
+def get_center(surf):
+    # Put the center of surf at the center of the display
+    surf_center = (
+        (utils.screen_width-surf.get_width())/2,
+        (utils.screen_height-surf.get_height())/2
+    )
+    return surf_center
+
+
+# Main loop
+running = True
+while running:
+    # Look at every event in the queue
+    for event in pygame.event.get():
+        # Did the user hit a key?
+        if event.type == KEYDOWN:
+            # Was it the Escape key? If so, stop the loop.
+            if event.key == K_ESCAPE:
+                running = False
+
+        # Did the user click the window close button? If so, stop the loop.
+        elif event.type == QUIT:
+            running = False
     
-    # Define the structuring element
-    # In this case, we're using a 3x3 rectangle
-    kernel = np.ones((3,3), np.uint8)
-
-    # Apply dilation
-    getEdge = cv2.dilate(getEdge, kernel, iterations=3)
-
-    #applying bilateral filter to remove noise
-    colorImage = cv2.bilateralFilter(frame, 15, 500, 500)
-
-    # Create a numpy array representing the color scalar
-    scalar = np.array([0b11000000, 0b11000000, 0b11000000])
-
-    # Apply the bitwise AND operation
-    colorImage = colorImage & scalar
+    # Draw the background image on the screen
+    screen.blit(background_image, (0, 0))
     
-    # Convert the image to 8-bit unsigned integers
-    colorImage = cv2.convertScaleAbs(colorImage)
-
-    #masking edged image with our "BEAUTIFY" image
-    cartoonImage = cv2.bitwise_and(colorImage, colorImage, mask=getEdge)
+    # Draw the another image on the screen at the specified position
+    screen.blit(photographer_with_legs, photographer_position)
     
-    # Convert the cartoonImage to the HSV color space
-    hsv = cv2.cvtColor(cartoonImage, cv2.COLOR_BGR2HSV)
-
-    # Increase the V channel to brighten the image
-    hsv[:,:,2] = np.clip(hsv[:,:,2]*1.25, 0, 255)
-
-    # Convert the image back to the BGR color space
-    cartoonImage = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+    if painting:
+        screen.blit(painting, painting_position)
     
-    # Add alpha channel to the image
-    cartoonImage = cv2.cvtColor(cartoonImage, cv2.COLOR_BGR2BGRA)
+    # Get the current time
+    current_time = pygame.time.get_ticks()
+    
+    # If it's time to play the animation
+    if current_time - last_capture_time >= capture_interval:
+        # Start the thread
+        capture_thread = threading.Thread(target=capture_image.capture_kawaii_image)
+        capture_thread.start()
+        capturing = True
+        
+        # Update the time when the last animation was played
+        last_capture_time = current_time
+        
+        
+    elif not capture_thread.is_alive() and capturing:
+        # Play the animation
+        for i in range(len(animation_images)):
+            image = animation_images[i]
+            if i == 6:
+                # Fill the screen with white
+                screen.fill((255, 255, 255))
+                pygame.display.flip()
+                capturing = False
+                last_capture_time = current_time
+                pygame.time.wait(250)  # wait
+                painting = pygame.image.load('image-filtering-test\painting.jpg')
+                painting = pygame.transform.scale(painting, painting_size)
+            # Clear the screen by redrawing the background image
+            screen.blit(background_image, (0, 0))
+            # Draw the another image on the screen at the specified position
+            screen.blit(photographer_with_legs, photographer_position)
+            # Draw the current frame of the animation
+            screen.blit(image, animation_position)
+            if painting:
+                screen.blit(painting, painting_position)
+            pygame.display.flip()
+            # Wait for the next frame
+            clock.tick(frame_rate)
+        
+    else:
+        # Only update the bobbing effect every nth frame
+        if bob_frame_counter % bob_update_frequency == 0:
+            bob_frame_counter = 0
+            # Make the image bob up and down
+            bob_animation_position[1] = 402 + math.sin(pygame.time.get_ticks() / 400) * 2  # Increase the speed and decrease the distance
+        # Draw the first image of the animation
+        screen.blit(animation_images[0], bob_animation_position)
+        
+    # Increment the frame counter
+    bob_frame_counter += 1
+    
+    pygame.display.flip()
+    
 
-    # Find all facial features in all the faces in the image
-    face_landmarks_list = face_recognition.face_landmarks(frame)
+# Done! Time to quit.
+pygame.quit()
 
-    # Loop through each face
-    for face_landmarks in face_landmarks_list:
-        # Overlay image on each eye
-        for eye, eye_image in [('left_eye', left_eye_image), ('right_eye', right_eye_image)]:
-            points = face_landmarks[eye]
-            x_min = min(points, key=lambda p: p[0])[0]
-            x_max = max(points, key=lambda p: p[0])[0]
-            y_min = min(points, key=lambda p: p[1])[1]
-            y_max = max(points, key=lambda p: p[1])[1]
-            eye_size = max(x_max - x_min, y_max - y_min) * 2
-            resized_eye_image = cv2.resize(eye_image, (eye_size, eye_size))
-            # Adjust the position to keep the eye image centered
-            x_min -= eye_size // 4
-            y_min -= eye_size // 4
-             # Overlay the eye image
-            for c in range(0, 3):
-                cartoonImage[y_min:y_min+eye_size, x_min:x_min+eye_size, c] = resized_eye_image[:,:,c] * (resized_eye_image[:,:,3]/255.0) +  cartoonImage[y_min:y_min+eye_size, x_min:x_min+eye_size, c] * (1.0 - resized_eye_image[:,:,3]/255.0)
-
-        # Overlay image on mouth
-        points = face_landmarks['bottom_lip']
-        x_min = min(points, key=lambda p: p[0])[0]
-        x_max = max(points, key=lambda p: p[0])[0]
-        y_min = min(points, key=lambda p: p[1])[1]
-        y_max = max(points, key=lambda p: p[1])[1]
-        mouth_width = int((x_max - x_min) * 1.5)
-        mouth_height = int((y_max - y_min) * 1.5)
-        resized_mouth_image = cv2.resize(mouth_image, (mouth_width, mouth_height))
-        # Adjust the position to keep the mouth image centered
-        x_min -= mouth_width // 3
-        y_min -= mouth_height // 3
-        # Overlay the mouth image
-        for c in range(0, 3):
-            cartoonImage[y_min:y_min+mouth_height, x_min:x_min+mouth_width, c] = resized_mouth_image[:,:,c] * (resized_mouth_image[:,:,3]/255.0) +  cartoonImage[y_min:y_min+mouth_height, x_min:x_min+mouth_width, c] * (1.0 - resized_mouth_image[:,:,3]/255.0)
-        # # Overlay image on each cheek
-        # for cheek in ['left_cheek', 'right_cheek']:
-        #     points = face_landmarks[cheek]
-        #     cheek_size = max(max(points, key=lambda p: p[0])[0] - min(points, key=lambda p: p[0])[0],
-        #                     max(points, key=lambda p: p[1])[1] - min(points, key=lambda p: p[1])[1])
-        #     resized_cheek_image = cv2.resize(cheek_image, (cheek_size, cheek_size))
-        #     for point in points:
-        #         x, y = point
-        #         # Overlay the cheek image
-        #         cartoonImage[y:y+cheek_size, x:x+cheek_size] = resized_cheek_image
-
-
-    # Display the cartoon effect image
-    cv2.imshow("Kawaii Effect", cartoonImage)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-else:
-    print("Can't receive frame (stream end?). Exiting ...")
+capture_thread.join()
