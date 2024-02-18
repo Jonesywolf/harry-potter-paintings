@@ -2,7 +2,7 @@ import requests
 import time
 
 # Specify the local server url
-url = "http://localhost:5000"
+url = "http://192.168.137.53:5000"
 
 # Door states: open, close
 DOOR_OPEN = "DOOR_OPEN"
